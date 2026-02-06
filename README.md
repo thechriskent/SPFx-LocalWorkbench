@@ -1,11 +1,12 @@
 # SPFx Local Workbench
 
-A Visual Studio Code extension that brings back the **local workbench** for testing SharePoint Framework (SPFx) web parts without deploying to SharePoint.
+A Visual Studio Code extension that brings back the **local workbench** for testing SharePoint Framework (SPFx) web parts and **Application Customizers** without deploying to SharePoint.
 
 > **Background**: Microsoft removed the local workbench in SPFx 1.13+. This extension restores that functionality with a custom-built workbench environment that simulates the SPFx runtime.
 
 ## Features
 
+### Web Parts
 - **Automatic SPFx Detection**: Automatically detects SPFx projects in your workspace
 - **Web Part Discovery**: Parses all web part manifests from your project  
 - **SPFx Runtime Environment**: Custom-built workbench that simulates the SPFx runtime with AMD module loading
@@ -13,6 +14,13 @@ A Visual Studio Code extension that brings back the **local workbench** for test
 - **Live Reload Support**: Works with `heft start` for real-time development
 - **Multiple Web Parts**: Add, configure, and test multiple web parts simultaneously on the canvas
 - **Theme Support**: Choose from multiple SharePoint theme presets (Team Site, Communication Site, Dark Mode)
+
+### Application Customizers
+- **Extension Discovery**: Automatically detects Application Customizer manifests alongside web parts
+- **Header & Footer Placeholders**: Simulated `Top` and `Bottom` placeholder zones, just like SharePoint
+- **Interactive Add/Remove**: Use the `+` button in the header zone to add extensions from a picker
+- **Property Editing**: Click the edit (pencil) icon on a loaded extension to modify its `ClientSideComponentProperties` and re-render
+- **PlaceholderProvider Mock**: Full mock of `context.placeholderProvider` including `tryCreateContent()` and `changedEvent`
 
 ## Requirements
 
@@ -52,6 +60,7 @@ This extension provides a **custom-built workbench environment** that simulates 
 4. Mock SharePoint context and APIs are provided to web parts
 5. The runtime fetches your web part bundles from `https://localhost:4321`
 6. Your web parts render in a simulated SharePoint environment
+7. Application Customizers are loaded the same way, with mocked `Top`/`Bottom` placeholder zones rendered above and below the canvas
 
 ## Commands
 
@@ -120,6 +129,12 @@ Customize the mock SharePoint context:
 - Verify your SPFx project builds successfully
 - Check that your web part bundle is being served correctly
 
+### Application Customizer not rendering
+- Open DevTools and check for errors loading the extension bundle
+- Ensure your extension's `componentType` is set to `"Extension"` in the manifest
+- Verify the extension bundle is being served (check `internalModuleBaseUrls` in the manifest)
+- If the extension uses localized strings, a proxy mock is provided automatically
+
 ### Certificate errors
 SPFx uses HTTPS with a self-signed certificate. You may need to:
 1. Visit `https://localhost:4321` in your browser
@@ -152,9 +167,10 @@ webview/
     main.ts                 # Alternative non-React entry point
     WorkbenchRuntime.ts     # Main workbench orchestrator
     WebPartManager.ts       # Web part loading and lifecycle
+    ExtensionManager.ts     # Application Customizer loading and lifecycle
     amd/                    # AMD module loader for SPFx bundles
-    components/             # React components (App, Canvas, PropertyPane, etc.)
-    mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane)
+    components/             # React components (App, Canvas, PropertyPane, ExtensionPicker, etc.)
+    mocks/                  # SharePoint API mocks (Context, Theme, PropertyPane, sp-application-base)
     ui/                     # UI utilities (CanvasRenderer)
     types/                  # Webview-specific type definitions
 ```
