@@ -59,8 +59,8 @@ async function build() {
                         path: path.resolve(args.resolveDir, args.path),
                         namespace: 'css-module',
                     }));
-                    build.onLoad({ filter: /.*/, namespace: 'css-module' }, args => ({
-                        contents: `@import ${JSON.stringify(args.path)};`,
+                    build.onLoad({ filter: /.*/, namespace: 'css-module' }, async (args) => ({
+                        contents: await fs.promises.readFile(args.path, 'utf8'),
                         loader: 'local-css',
                         resolveDir: path.dirname(args.path),
                     }));
