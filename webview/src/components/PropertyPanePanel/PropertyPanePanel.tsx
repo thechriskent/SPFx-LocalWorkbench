@@ -1,16 +1,5 @@
-import React, { useState, useEffect, useRef, FC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import {
-    TextField,
-    Checkbox,
-    Toggle,
-    Dropdown,
-    Slider,
-    ChoiceGroup,
-    PrimaryButton,
-    Label,
-    Link,
-    IDropdownOption,
-    IChoiceGroupOption,
     Text,
     Separator,
     Stack,
@@ -19,6 +8,19 @@ import {
 import type { IActiveWebPart } from '../../types';
 import { PropertyPaneFieldType } from '../../mocks/PropertyPaneMocks';
 import styles from './PropertyPanePanel.module.css';
+import {
+    TextFieldComponent,
+    CheckboxComponent,
+    ToggleComponent,
+    DropdownComponent,
+    SliderComponent,
+    ChoiceGroupComponent,
+    ButtonComponent,
+    LabelComponent,
+    LinkComponent,
+    HeadingComponent,
+    CustomFieldComponent
+} from './components';
 
 interface IPropertyPanePanelProps {
     webPart?: IActiveWebPart;
@@ -35,9 +37,12 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
 
     useEffect(() => {
         if (webPart?.instance && typeof webPart.instance.getPropertyPaneConfiguration === 'function') {
+            console.log('PropertyPanePanel - Received webPart:', webPart);
+            (window as any).ckWP = webPart; // Expose for debugging
             try {
                 const paneConfig = webPart.instance.getPropertyPaneConfiguration();
                 setConfig(paneConfig);
+                console.log('PropertyPanePanel - Retrieved configuration:', paneConfig);
             } catch (e: any) {
                 console.error('PropertyPane - Error getting configuration:', e);
                 setConfig(null);
@@ -50,7 +55,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     return (
         <div id="property-pane" className={`${styles.panel} ${webPart ? styles.open : ''}`}>
             <Stack horizontal horizontalAlign="space-between" verticalAlign="center" styles={{ root: { padding: '12px 16px', borderBottom: '1px solid #edebe9' } }}>
-                <Text variant="large" styles={{ root: { fontWeight: 600 } }}>Properties</Text>
+                <Text variant="large" styles={{ root: { fontWeight: 600 } }}>{webPart?.manifest.alias ?? 'Properties'}</Text>
                 <IconButton
                     iconProps={{ iconName: 'Cancel' }}
                     title="Close"
@@ -181,213 +186,4 @@ const PropertyPaneField: FC<IPropertyPaneFieldProps> = ({
                 </Text>
             );
     }
-};
-
-// Individual field components using Fluent UI
-
-// Helper to extract string value (handles localization objects)
-const getString = (prop: any): string | undefined => {
-    if (!prop) return undefined;
-    if (typeof prop === 'string') return prop;
-    // Handle localized string objects like { default: "Label", ... }
-    if (typeof prop === 'object' && prop.default) return prop.default;
-    return String(prop);
-};
-
-const TextFieldComponent: FC<{ field: any; value: any; onChange: (value: string) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const label = getString(field.properties?.label || field.properties?.Label);
-    const description = getString(field.properties?.description || field.properties?.Description);
-    const placeholder = getString(field.properties?.placeholder || field.properties?.Placeholder);
-    
-    // Fallback: use targetProperty as label if no label provided
-    const displayLabel = label || (field.targetProperty ? 
-        field.targetProperty.charAt(0).toUpperCase() + field.targetProperty.slice(1) : 
-        undefined);
-    
-    return (
-        <TextField
-            label={displayLabel}
-            description={description}
-            placeholder={placeholder}
-            value={value || ''}
-            onChange={(_, newValue) => onChange(newValue || '')}
-            multiline={field.properties?.multiline}
-            rows={field.properties?.rows || 3}
-        />
-    );
-};
-
-const CheckboxComponent: FC<{ field: any; value: any; onChange: (value: boolean) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const text = getString(field.properties?.text || field.properties?.Text);
-    
-    return (
-        <Checkbox
-            label={text}
-            checked={!!value}
-            onChange={(_, checked) => onChange(!!checked)}
-        />
-    );
-};
-
-const ToggleComponent: FC<{ field: any; value: any; onChange: (value: boolean) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const label = getString(field.properties?.label || field.properties?.Label);
-    const onText = getString(field.properties?.onText || field.properties?.OnText) || 'On';
-    const offText = getString(field.properties?.offText || field.properties?.OffText) || 'Off';
-    
-    return (
-        <Toggle
-            label={label}
-            checked={!!value}
-            onText={onText}
-            offText={offText}
-            onChange={(_, checked) => onChange(!!checked)}
-        />
-    );
-};
-
-const DropdownComponent: FC<{ field: any; value: any; onChange: (value: any) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const label = getString(field.properties?.label || field.properties?.Label);
-    const options = (field.properties?.options || field.properties?.Options || []).map((opt: any) => ({
-        key: opt.key,
-        text: getString(opt.text) || opt.text
-    })) as IDropdownOption[];
-    
-    return (
-        <Dropdown
-            label={label}
-            selectedKey={value}
-            options={options}
-            onChange={(_, option) => onChange(option?.key)}
-        />
-    );
-};
-
-const SliderComponent: FC<{ field: any; value: any; onChange: (value: number) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const label = getString(field.properties?.label || field.properties?.Label);
-    const min = field.properties?.min ?? field.properties?.Min ?? 0;
-    const max = field.properties?.max ?? field.properties?.Max ?? 100;
-    const step = field.properties?.step ?? field.properties?.Step ?? 1;
-    
-    return (
-        <Slider
-            label={label}
-            min={min}
-            max={max}
-            step={step}
-            value={value !== undefined ? value : min}
-            showValue
-            onChange={(newValue) => onChange(newValue)}
-        />
-    );
-};
-
-const ChoiceGroupComponent: FC<{ field: any; value: any; onChange: (value: any) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    const label = getString(field.properties?.label || field.properties?.Label);
-    const options = (field.properties?.options || field.properties?.Options || []).map((opt: any) => ({
-        key: opt.key,
-        text: getString(opt.text) || opt.text
-    })) as IChoiceGroupOption[];
-    
-    return (
-        <ChoiceGroup
-            label={label}
-            selectedKey={value}
-            options={options}
-            onChange={(_, option) => onChange(option?.key)}
-        />
-    );
-};
-
-const ButtonComponent: FC<{ field: any }> = ({ field }) => {
-    const text = getString(field.properties?.text || field.properties?.Text);
-    return (
-        <PrimaryButton
-            text={text}
-            onClick={() => {
-                if (field.properties?.onClick) {
-                    field.properties.onClick();
-                }
-            }}
-        />
-    );
-};
-
-const LabelComponent: FC<{ field: any }> = ({ field }) => {
-    const text = getString(field.properties?.text || field.properties?.Text);
-    return <Label>{text}</Label>;
-};
-
-const LinkComponent: FC<{ field: any }> = ({ field }) => {
-    const text = getString(field.properties?.text || field.properties?.Text);
-    const href = field.properties?.href || field.properties?.Href;
-    return (
-        <Link
-            href={href}
-            target={field.properties?.target || '_blank'}
-            rel="noopener noreferrer"
-        >
-            {text}
-        </Link>
-    );
-};
-
-const HeadingComponent: FC<{ field: any }> = ({ field }) => {
-    const text = getString(field.properties?.text || field.properties?.Text);
-    return <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>{text}</Text>;
-};
-
-const CustomFieldComponent: FC<{ field: any; value: any; onChange: (value: any) => void }> = ({
-    field,
-    value,
-    onChange
-}) => {
-    // Custom fields can render their own content
-    if (field.properties.onRender && typeof field.properties.onRender === 'function') {
-        const containerRef = useRef<HTMLDivElement>(null);
-        
-        useEffect(() => {
-            if (containerRef.current) {
-                try {
-                    field.properties.onRender(containerRef.current, value, onChange);
-                } catch (e: any) {
-                    console.error('PropertyPane - Custom field render error:', e);
-                }
-            }
-        }, [field, value, onChange]);
-
-        return <div className="pp-field" ref={containerRef}></div>;
-    }
-
-    // Fallback for custom fields without onRender
-    return (
-        <div className="pp-field">
-            <div style={{ color: '#605e5c', fontStyle: 'italic' }}>
-                Custom Field {field.properties.key || ''}
-            </div>
-        </div>
-    );
 };
