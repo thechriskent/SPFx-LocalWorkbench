@@ -33,10 +33,10 @@ export interface IHtmlGeneratorConfig {
 function generateCsp(config: IHtmlGeneratorConfig): string {
     return [
         `default-src 'none'`,
-        `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl} https://unpkg.com`,
+        `style-src ${config.cspSource} 'unsafe-inline' ${config.serveUrl}`,
         // Note: 'unsafe-eval' is still required for AMD module loader and SPFx bundles
         // 'nonce-${nonce}' allows our bundled script while blocking inline scripts
-        `script-src 'nonce-${config.nonce}' 'unsafe-eval' ${config.cspSource} ${config.serveUrl} https://unpkg.com`,
+        `script-src 'nonce-${config.nonce}' 'unsafe-eval' ${config.cspSource} ${config.serveUrl}`,
         `connect-src ${config.serveUrl} https://*.sharepoint.com https://login.windows.net`,
         `img-src ${config.cspSource} ${config.serveUrl} https: data:`,
         `font-src ${config.cspSource} ${config.serveUrl} https: data:`,
@@ -109,13 +109,24 @@ function generateScripts(config: IHtmlGeneratorConfig): string {
         pageContext: config.pageContextSettings
     };
     
+    // Resolve local vendor UMD bundles shipped with the extension
+    const reactUri = config.webview.asWebviewUri(
+        vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'vendor', 'react.js')
+    );
+    const reactDomUri = config.webview.asWebviewUri(
+        vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'vendor', 'react-dom.js')
+    );
+    const fluentUri = config.webview.asWebviewUri(
+        vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'vendor', 'fluentui-react.js')
+    );
+
     return `
-    <!-- Load React 17.0.2 from CDN - SPFx uses React 17.0.2 -->
-    <script nonce="${config.nonce}" src="https://unpkg.com/react@17.0.2/umd/react.development.js" crossorigin></script>
-    <script nonce="${config.nonce}" src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js" crossorigin></script>
+    <!-- React 17.0.2 UMD - bundled locally (matches SPFx runtime) -->
+    <script nonce="${config.nonce}" src="${reactUri}"></script>
+    <script nonce="${config.nonce}" src="${reactDomUri}"></script>
     
-    <!-- Load Fluent UI (Office UI Fabric React) v8 - matches SPFx -->
-    <script nonce="${config.nonce}" src="https://unpkg.com/@fluentui/react@8.110.10/dist/fluentui-react.js" crossorigin></script>
+    <!-- Fluent UI React v8 UMD - bundled locally (matches SPFx runtime) -->
+    <script nonce="${config.nonce}" src="${fluentUri}"></script>
     
     <!-- Inject workbench configuration -->
     <script nonce="${config.nonce}">

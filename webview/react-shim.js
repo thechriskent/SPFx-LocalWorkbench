@@ -1,5 +1,5 @@
 // React Shim for esbuild
-// Maps React imports to the CDN-loaded global
+// Maps React imports to the global set by the local vendor UMD bundle
 
 export default window.React;
 export const { 
