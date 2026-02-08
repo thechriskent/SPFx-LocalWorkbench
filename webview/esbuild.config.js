@@ -4,9 +4,41 @@
 
 const esbuild = require('esbuild');
 const path = require('path');
+const fs = require('fs');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
+
+/**
+ * Copies vendor UMD bundles (React, ReactDOM, Fluent UI) from node_modules
+ * into dist/webview/vendor/ so they can be served as local webview assets
+ */
+function copyVendorFiles() {
+    const vendorDir = path.resolve(__dirname, '..', 'dist', 'webview', 'vendor');
+    fs.mkdirSync(vendorDir, { recursive: true });
+
+    const suffix = production ? 'production.min' : 'development';
+    const vendors = [
+        {
+            src: path.resolve(__dirname, '..', 'node_modules', 'react', 'umd', `react.${suffix}.js`),
+            dest: path.join(vendorDir, 'react.js')
+        },
+        {
+            src: path.resolve(__dirname, '..', 'node_modules', 'react-dom', 'umd', `react-dom.${suffix}.js`),
+            dest: path.join(vendorDir, 'react-dom.js')
+        },
+        {
+            src: path.resolve(__dirname, '..', 'node_modules', '@fluentui', 'react', 'dist',
+                production ? 'fluentui-react.min.js' : 'fluentui-react.js'),
+            dest: path.join(vendorDir, 'fluentui-react.js')
+        }
+    ];
+
+    for (const { src, dest } of vendors) {
+        fs.copyFileSync(src, dest);
+        console.log(`Copied ${path.basename(src)} -> ${path.relative(process.cwd(), dest)}`);
+    }
+}
 
 async function build() {
     const ctx = await esbuild.context({
@@ -31,6 +63,9 @@ async function build() {
         },
         logLevel: 'info'
     });
+
+    // Copy vendor UMD files (React, ReactDOM, Fluent UI) to dist
+    copyVendorFiles();
 
     if (watch) {
         await ctx.watch();

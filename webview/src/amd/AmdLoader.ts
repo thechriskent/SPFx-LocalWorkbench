@@ -17,9 +17,12 @@ export class AmdLoader {
     }
 
     initialize(): void {
-        // Verify React loaded from CDN
+        // React is required for the workbench UI itself (App, Canvas, Toolbar, etc.).
+        // It is also registered as an AMD module so React-based SPFx web parts can
+        // resolve require('react') — mirroring how SharePoint provides React as a
+        // page-level global. Non-React web parts simply ignore it.
         if (!window.React || !window.ReactDOM) {
-            console.error('AmdLoader - React not loaded from CDN!');
+            console.error('AmdLoader - React/ReactDOM globals not found. The workbench UI requires React to render.');
             return;
         }
 

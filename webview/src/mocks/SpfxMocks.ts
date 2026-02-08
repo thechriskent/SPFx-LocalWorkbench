@@ -72,7 +72,7 @@ export function initializeSpfxMocks(): void {
     });
     
     // Pre-register modules for SPFx dependencies
-    // React and ReactDOM come from the CDN-loaded globals
+    // React and ReactDOM come from local vendor UMD bundles (window globals)
     amdModules['react'] = window.React;
     amdModules['React'] = window.React;
     amdModules['react-dom'] = window.ReactDOM;
