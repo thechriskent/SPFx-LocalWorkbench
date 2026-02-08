@@ -2,6 +2,7 @@ import React, { useState, Fragment, FC } from 'react';
 import { IconButton, Text, Stack } from '@fluentui/react';
 import type { IWebPartManifest, IWebPartConfig } from '../types';
 import { WebPartPicker } from './WebPartPicker';
+import styles from './WorkbenchCanvas.module.css';
 
 interface IWorkbenchCanvasProps {
     manifests: IWebPartManifest[];
@@ -81,7 +82,7 @@ export const WorkbenchCanvas: FC<IWorkbenchCanvasProps> = ({
             {openPickerIndex !== null && (
                 <div 
                     id="picker-overlay" 
-                    className="open" 
+                    className={styles.pickerOverlay}
                     onClick={handleOverlayClick}
                 />
             )}
@@ -105,10 +106,10 @@ const AddZone: FC<IAddZoneProps> = ({
     onSelect
 }) => {
     return (
-        <div className="add-zone" data-insert-index={insertIndex}>
-            <div className="add-zone-line" />
+        <div className={styles.addZone} data-insert-index={insertIndex}>
+            <div className={styles.addZoneLine} />
             <button
-                className="add-zone-button"
+                className={styles.addZoneButton}
                 title="Add a web part"
                 onClick={(e) => {
                     e.stopPropagation();
@@ -117,7 +118,7 @@ const AddZone: FC<IAddZoneProps> = ({
             >
                 +
             </button>
-            <div className="add-zone-line" />
+            <div className={styles.addZoneLine} />
             <WebPartPicker
                 insertIndex={insertIndex}
                 manifests={manifests}
@@ -142,8 +143,8 @@ const WebPartZone: FC<IWebPartZoneProps> = ({
     onDelete
 }) => {
     return (
-        <div className="webpart-zone">
-            <div className="webpart-toolbar">
+        <div className={styles.webPartZone}>
+            <div className={styles.webPartToolbar}>
                 <IconButton
                     iconProps={{ iconName: 'Edit' }}
                     title="Edit properties"
@@ -157,8 +158,8 @@ const WebPartZone: FC<IWebPartZoneProps> = ({
                     onClick={onDelete}
                 />
             </div>
-            <div className="webpart-container">
-                <div className="webpart-content" id={`webpart-${index}`}>
+            <div className={styles.webPartContainer}>
+                <div className={styles.webPartContent} id={`webpart-${index}`}>
                     {/* Web part rendered here by WorkbenchRuntime */}
                 </div>
             </div>

@@ -8,6 +8,7 @@ import { Toolbar } from './Toolbar';
 import { ExtensionPicker } from './ExtensionPicker';
 import { ExtensionPropertiesPanel } from './ExtensionPropertiesPanel';
 import { IconButton } from '@fluentui/react';
+import styles from './App.module.css';
 
 interface IAppProps {
     config: IWorkbenchConfig;
@@ -67,15 +68,15 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
 
     return (
         <ErrorBoundary>
-            <div className="workbench-app">
+            <div className={styles.workbenchApp}>
                 <Toolbar onRefresh={handleRefresh} onOpenDevTools={handleOpenDevTools} />
                 
                 {/* Application Customizer Header Placeholder */}
-                <div className="app-customizer-zone app-customizer-header" id="app-customizer-header">
+                <div className={`${styles.appCustomizerZone} ${styles.appCustomizerHeader}`} id="app-customizer-header">
                     {activeExtensions.map((ext) => (
-                        <div key={ext.instanceId} className="app-customizer-extension-wrapper">
-                            <div className="app-customizer-extension-toolbar">
-                                <span className="app-customizer-extension-label">
+                        <div key={ext.instanceId} className={styles.appCustomizerExtensionWrapper}>
+                            <div className={styles.appCustomizerExtensionToolbar}>
+                                <span className={styles.appCustomizerExtensionLabel}>
                                     {ext.manifest.preconfiguredEntries?.[0]?.title?.default || ext.manifest.alias}
                                 </span>
                                 <IconButton
@@ -102,10 +103,10 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                         </div>
                     ))}
                     {extensionManifests.length > 0 && (
-                        <div className="app-customizer-add-zone">
-                            <div className="add-zone-line" />
+                        <div className={styles.appCustomizerAddZone}>
+                            <div className={styles.addZoneLine} />
                             <button
-                                className="add-zone-button"
+                                className={styles.addZoneButton}
                                 title="Add an extension"
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -114,7 +115,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                             >
                                 +
                             </button>
-                            <div className="add-zone-line" />
+                            <div className={styles.addZoneLine} />
                             <ExtensionPicker
                                 manifests={manifests}
                                 isOpen={extensionPickerOpen}
@@ -154,7 +155,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                 {/* Extension picker overlay */}
                 {extensionPickerOpen && (
                     <div
-                        className="picker-overlay open"
+                        className={styles.pickerOverlay}
                         onClick={() => setExtensionPickerOpen(false)}
                     />
                 )}

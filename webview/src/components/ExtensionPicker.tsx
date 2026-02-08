@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FC } from 'react';
 import { SearchBox, Text, Stack, Icon } from '@fluentui/react';
 import type { IWebPartManifest } from '../types';
+import styles from './ExtensionPicker.module.css';
 
 interface IExtensionPickerProps {
     manifests: IWebPartManifest[];
@@ -30,7 +31,7 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
         return title.toLowerCase().includes(filter.toLowerCase());
     });
 
-    const popupClassName = `extension-picker-popup ${isOpen ? 'open' : ''}`;
+    const popupClassName = `${styles.popup} ${isOpen ? styles.open : ''}`;
 
     return (
         <div className={popupClassName}>
@@ -44,7 +45,7 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
                 <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
                     Available extensions
                 </Text>
-                <div className="picker-results">
+                <div className={styles.results}>
                     {filteredExtensions.length > 0 ? (
                         filteredExtensions.map((ext) => {
                             const title = ext.preconfiguredEntries?.[0]?.title?.default || ext.alias;
@@ -52,7 +53,7 @@ export const ExtensionPicker: FC<IExtensionPickerProps> = ({
                             return (
                                 <div
                                     key={ext.id}
-                                    className="picker-item"
+                                    className={styles.item}
                                     onClick={() => {
                                         onSelect(manifestIndex);
                                     }}

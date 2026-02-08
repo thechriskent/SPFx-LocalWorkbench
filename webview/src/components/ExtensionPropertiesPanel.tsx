@@ -9,6 +9,7 @@ import {
     Separator
 } from '@fluentui/react';
 import type { IExtensionConfig } from '../types';
+import styles from './ExtensionPropertiesPanel.module.css';
 
 interface IExtensionPropertiesPanelProps {
     extension?: IExtensionConfig;
@@ -48,7 +49,7 @@ export const ExtensionPropertiesPanel: FC<IExtensionPropertiesPanelProps> = ({
         || 'Extension';
 
     return (
-        <div className={`property-pane ${extension ? 'open' : ''}`}>
+        <div className={`${styles.panel} ${extension ? styles.open : ''}`}>
             <Stack
                 horizontal
                 horizontalAlign="space-between"

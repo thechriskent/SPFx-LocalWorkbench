@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react';
 import type { IActiveWebPart } from '../types';
 import { PropertyPaneFieldType } from '../mocks/PropertyPaneMocks';
+import styles from './PropertyPanePanel.module.css';
 
 interface IPropertyPanePanelProps {
     webPart?: IActiveWebPart;
@@ -47,7 +48,7 @@ export const PropertyPanePanel: FC<IPropertyPanePanelProps> = ({
     }, [webPart]);
 
     return (
-        <div id="property-pane" className={`property-pane ${webPart ? 'open' : ''}`}>
+        <div id="property-pane" className={`${styles.panel} ${webPart ? styles.open : ''}`}>
             <Stack horizontal horizontalAlign="space-between" verticalAlign="center" styles={{ root: { padding: '12px 16px', borderBottom: '1px solid #edebe9' } }}>
                 <Text variant="large" styles={{ root: { fontWeight: 600 } }}>Properties</Text>
                 <IconButton

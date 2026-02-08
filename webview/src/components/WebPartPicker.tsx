@@ -1,6 +1,7 @@
 import React, { useState, useEffect, FC } from 'react';
 import { SearchBox, Text, Stack, Icon } from '@fluentui/react';
 import type { IWebPartManifest } from '../types';
+import styles from './WebPartPicker.module.css';
 
 interface IWebPartPickerProps {
     insertIndex: number;
@@ -33,7 +34,7 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
     });
 
     return (
-        <div className={`webpart-picker-popup ${isOpen ? 'open' : ''}`} id={`picker-${insertIndex}`}>
+        <div className={`${styles.popup} ${isOpen ? styles.open : ''}`} id={`picker-${insertIndex}`}>
             <Stack tokens={{ childrenGap: 8 }} styles={{ root: { padding: '12px' } }}>
                 <SearchBox
                     placeholder="Search web parts"
@@ -44,7 +45,7 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
                 <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
                     Available web parts
                 </Text>
-                <div className="picker-results" id={`picker-results-${insertIndex}`}>
+                <div className={styles.results} id={`picker-results-${insertIndex}`}>
                     {filteredWebParts.length > 0 ? (
                         filteredWebParts.map((wp) => {
                             const title = wp.preconfiguredEntries?.[0]?.title?.default || wp.alias;
@@ -52,7 +53,7 @@ export const WebPartPicker: FC<IWebPartPickerProps> = ({
                             return (
                                 <div
                                     key={wp.id}
-                                    className="picker-item"
+                                    className={styles.item}
                                     data-insert={insertIndex}
                                     data-manifest={manifestIndex}
                                     onClick={() => onSelect(insertIndex, manifestIndex)}

@@ -45,7 +45,11 @@ async function build() {
         entryPoints: ['webview/src/main.tsx'],
         bundle: true,
         outfile: 'dist/webview/webview.js',
-        loader: { '.tsx': 'tsx', '.ts': 'ts' },
+        loader: { 
+            '.tsx': 'tsx', 
+            '.ts': 'ts',
+            '.css': 'css'
+        },
         format: 'iife',
         target: 'es2020',
         platform: 'browser',
