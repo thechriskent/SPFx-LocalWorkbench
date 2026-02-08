@@ -45,7 +45,28 @@ async function build() {
         entryPoints: ['webview/src/main.tsx'],
         bundle: true,
         outfile: 'dist/webview/webview.js',
-        loader: { '.tsx': 'tsx', '.ts': 'ts' },
+        loader: { 
+            '.tsx': 'tsx', 
+            '.ts': 'ts',
+            '.css': 'css',
+        },
+        plugins: [
+            {
+                name: 'css-modules-convention',
+                setup(build) {
+                    // Treat *.module.css as CSS modules (locally scoped)
+                    build.onResolve({ filter: /\.module\.css$/ }, args => ({
+                        path: path.resolve(args.resolveDir, args.path),
+                        namespace: 'css-module',
+                    }));
+                    build.onLoad({ filter: /.*/, namespace: 'css-module' }, async (args) => ({
+                        contents: await fs.promises.readFile(args.path, 'utf8'),
+                        loader: 'local-css',
+                        resolveDir: path.dirname(args.path),
+                    }));
+                },
+            },
+        ],
         format: 'iife',
         target: 'es2020',
         platform: 'browser',

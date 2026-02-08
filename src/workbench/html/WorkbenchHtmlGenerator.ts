@@ -3,7 +3,6 @@
 // This module generates the complete HTML for the workbench webview.
 
 import * as vscode from 'vscode';
-import { getWorkbenchStyles } from './workbenchStyles';
 import type {
     IThemeConfig,
     IContextConfig,
@@ -47,14 +46,18 @@ function generateCsp(config: IHtmlGeneratorConfig): string {
 // Generates the HTML head section
 function generateHead(config: IHtmlGeneratorConfig): string {
     const csp = generateCsp(config);
-    const styles = getWorkbenchStyles();
+    
+    // Get URI for the bundled CSS
+    const webviewCssUri = config.webview.asWebviewUri(
+        vscode.Uri.joinPath(config.extensionUri, 'dist', 'webview', 'webview.css')
+    );
     
     return `
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="${csp}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPFx Local Workbench</title>
-    <style>${styles}</style>
+    <link rel="stylesheet" href="${webviewCssUri}">
     `;
 }
 

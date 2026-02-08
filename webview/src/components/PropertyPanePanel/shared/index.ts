@@ -1,0 +1,1 @@
+export { getString } from './utils';

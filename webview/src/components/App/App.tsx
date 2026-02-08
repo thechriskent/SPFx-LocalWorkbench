@@ -1,12 +1,14 @@
 import React, { useState, useEffect, FC } from 'react';
-import type { IWorkbenchConfig, IWebPartManifest, IActiveWebPart, IActiveExtension } from '../types';
-import { WorkbenchCanvas } from './WorkbenchCanvas';
-import { PropertyPanePanel } from './PropertyPanePanel';
-import { ErrorBoundary } from './ErrorBoundary';
-import { Toolbar } from './Toolbar';
-import { ExtensionPicker } from './ExtensionPicker';
-import { ExtensionPropertiesPanel } from './ExtensionPropertiesPanel';
+import type { IWorkbenchConfig, IWebPartManifest, IWebPartConfig, IActiveWebPart, IExtensionConfig } from '../../types';
+import { isActiveWebPart } from '../../types';
+import { WorkbenchCanvas } from '../WorkbenchCanvas';
+import { PropertyPanePanel } from '../PropertyPanePanel';
+import { ErrorBoundary } from '../ErrorBoundary';
+import { Toolbar } from '../Toolbar';
+import { ExtensionPicker } from '../ExtensionPicker';
+import { ExtensionPropertiesPanel } from '../ExtensionPropertiesPanel';
 import { IconButton } from '@fluentui/react';
+import styles from './App.module.css';
 
 interface IAppProps {
     config: IWorkbenchConfig;
@@ -15,8 +17,8 @@ interface IAppProps {
 
 export interface IAppHandlers {
     setManifests: (manifests: IWebPartManifest[]) => void;
-    setActiveWebParts: (webParts: IActiveWebPart[]) => void;
-    setActiveExtensions: (extensions: IActiveExtension[]) => void;
+    setActiveWebParts: (webParts: IWebPartConfig[]) => void;
+    setActiveExtensions: (extensions: IExtensionConfig[]) => void;
     openPropertyPane: (webPart: IActiveWebPart) => void;
     closePropertyPane: () => void;
     updateWebPartProperties: (instanceId: string, properties: any) => void;
@@ -24,14 +26,14 @@ export interface IAppHandlers {
 
 export const App: FC<IAppProps> = ({ config, onInitialized }) => {
     const [manifests, setManifests] = useState<IWebPartManifest[]>([]);
-    const [activeWebParts, setActiveWebParts] = useState<IActiveWebPart[]>([]);
-    const [activeExtensions, setActiveExtensions] = useState<IActiveExtension[]>([]);
-    const [selectedWebPart, setSelectedWebPart] = useState<IActiveWebPart | null>(null);
-    const [selectedExtension, setSelectedExtension] = useState<IActiveExtension | null>(null);
+    const [activeWebParts, setActiveWebParts] = useState<IWebPartConfig[]>([]);
+    const [activeExtensions, setActiveExtensions] = useState<IExtensionConfig[]>([]);
+    const [selectedWebPart, setSelectedWebPart] = useState<IActiveWebPart>();
+    const [selectedExtension, setSelectedExtension] = useState<IExtensionConfig>();
     const [extensionPickerOpen, setExtensionPickerOpen] = useState(false);
 
     const extensionManifests = manifests.filter(m => m.componentType === 'Extension');
-
+    
     // Expose handlers to parent (WorkbenchRuntime)
     useEffect(() => {
         const handlers: IAppHandlers = {
@@ -39,7 +41,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
             setActiveWebParts,
             setActiveExtensions,
             openPropertyPane: (webPart: IActiveWebPart) => setSelectedWebPart(webPart),
-            closePropertyPane: () => setSelectedWebPart(null),
+            closePropertyPane: () => setSelectedWebPart(undefined),
             updateWebPartProperties: (instanceId: string, properties: any) => {
                 setActiveWebParts(prev => prev.map(wp => 
                     wp.instanceId === instanceId ? { ...wp, properties } : wp
@@ -66,15 +68,14 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
 
     return (
         <ErrorBoundary>
-            <div className="workbench-app">
+            <div className={styles.workbenchApp}>
                 <Toolbar onRefresh={handleRefresh} onOpenDevTools={handleOpenDevTools} />
-                
-                {/* Application Customizer Header Placeholder */}
-                <div className="app-customizer-zone app-customizer-header" id="app-customizer-header">
-                    {activeExtensions.map((ext, index) => (
-                        <div key={ext.instanceId} className="app-customizer-extension-wrapper">
-                            <div className="app-customizer-extension-toolbar">
-                                <span className="app-customizer-extension-label">
+                {/* Application Customizer Header Placeholder */}         
+                <div className={`${styles.appCustomizerZone} ${styles.appCustomizerHeader}`} id="app-customizer-header">
+                    {activeExtensions.map((ext) => (
+                        <div key={ext.instanceId} className={styles.appCustomizerExtensionWrapper}>
+                            <div className={styles.appCustomizerExtensionToolbar}>
+                                <span className={styles.appCustomizerExtensionLabel}>
                                     {ext.manifest.preconfiguredEntries?.[0]?.title?.default || ext.manifest.alias}
                                 </span>
                                 <IconButton
@@ -101,10 +102,10 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                         </div>
                     ))}
                     {extensionManifests.length > 0 && (
-                        <div className="app-customizer-add-zone">
-                            <div className="add-zone-line" />
+                        <div className={styles.appCustomizerAddZone}>
+                            <div className={styles.addZoneLine} />
                             <button
-                                className="add-zone-button"
+                                className={styles.addZoneButton}
                                 title="Add an extension"
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -113,7 +114,7 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                             >
                                 +
                             </button>
-                            <div className="add-zone-line" />
+                            <div className={styles.addZoneLine} />
                             <ExtensionPicker
                                 manifests={manifests}
                                 isOpen={extensionPickerOpen}
@@ -136,8 +137,11 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                     }}
                     onEditWebPart={(index) => {
                         const webPart = activeWebParts[index];
-                        if (webPart) {
+                        console.log('Selected web part for editing:', webPart);
+                        if (webPart && isActiveWebPart(webPart)) {
                             setSelectedWebPart(webPart);
+                        } else {
+                            console.warn(`Web part at index ${index} is not active or does not exist.`);
                         }
                     }}
                     onDeleteWebPart={(index) => {
@@ -150,14 +154,14 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
                 {/* Extension picker overlay */}
                 {extensionPickerOpen && (
                     <div
-                        className="picker-overlay open"
+                        className={styles.pickerOverlay}
                         onClick={() => setExtensionPickerOpen(false)}
                     />
                 )}
 
                 <PropertyPanePanel
                     webPart={selectedWebPart}
-                    onClose={() => setSelectedWebPart(null)}
+                    onClose={() => setSelectedWebPart(undefined)}
                     onPropertyChange={(targetProperty, newValue) => {
                         if (selectedWebPart) {
                             window.dispatchEvent(new CustomEvent('updateProperty', {
@@ -173,12 +177,12 @@ export const App: FC<IAppProps> = ({ config, onInitialized }) => {
 
                 <ExtensionPropertiesPanel
                     extension={selectedExtension}
-                    onClose={() => setSelectedExtension(null)}
+                    onClose={() => setSelectedExtension(undefined)}
                     onPropertyChange={(instanceId, properties) => {
                         window.dispatchEvent(new CustomEvent('updateExtensionProperties', {
                             detail: { instanceId, properties }
                         }));
-                        setSelectedExtension(null);
+                        setSelectedExtension(undefined);
                     }}
                 />
             </div>

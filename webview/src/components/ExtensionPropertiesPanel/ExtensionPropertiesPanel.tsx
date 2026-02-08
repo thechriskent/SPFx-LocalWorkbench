@@ -8,10 +8,11 @@ import {
     PrimaryButton,
     Separator
 } from '@fluentui/react';
-import type { IActiveExtension } from '../types';
+import type { IExtensionConfig } from '../../types';
+import styles from './ExtensionPropertiesPanel.module.css';
 
 interface IExtensionPropertiesPanelProps {
-    extension: IActiveExtension | null;
+    extension?: IExtensionConfig;
     onClose: () => void;
     onPropertyChange: (instanceId: string, properties: Record<string, any>) => void;
 }
@@ -48,7 +49,7 @@ export const ExtensionPropertiesPanel: FC<IExtensionPropertiesPanelProps> = ({
         || 'Extension';
 
     return (
-        <div className={`property-pane ${extension ? 'open' : ''}`}>
+        <div className={`${styles.panel} ${extension ? styles.open : ''}`}>
             <Stack
                 horizontal
                 horizontalAlign="space-between"

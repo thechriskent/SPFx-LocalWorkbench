@@ -6,6 +6,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { WorkbenchRuntime } from './WorkbenchRuntime';
 import { App, IAppHandlers } from './components/App';
+import './styles/global.css';
 
 // Wait for DOM to be ready
 if (document.readyState === 'loading') {
